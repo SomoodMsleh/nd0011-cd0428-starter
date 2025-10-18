@@ -65,6 +65,10 @@ function populateProjects() {
         });
         projectContainer.append(Fragment);
 
+        if (projectData.length > 0){
+            updateSpotlight(projectData[0])
+        }
+
         setupProjectNavigation()
     } catch (error) {
         console.error('Error in populateProjects:', error);
@@ -149,7 +153,39 @@ function setupProjectNavigation() {
 
 function updateSpotlight(project) {
     try {
+        const spotlight = document.getElementById('projectSpotlight');
+        const spotlightTitle = document.getElementById('spotlightTitles');
 
+        let image = project.spotlight_image;
+        if (typeof image === 'string' && image.includes('../images')) {
+            image = image.replace('../images', './../starter/images');
+        }
+        const bgImage = image || './../starter/images/spotlight_placeholder_bg.webp';
+        spotlight.style.backgroundImage = `url(${bgImage})`;
+        spotlight.style.backgroundSize = 'cover';
+        spotlight.style.backgroundPosition = 'center';
+
+        spotlightTitle.innerHTML = '';
+        const Fragment = document.createDocumentFragment();
+
+        const title = document.createElement('h3');
+        title.textContent = project.project_name || 'untitled project';
+
+        const description = document.createElement('p');
+        description.textContent = project.long_description || 'No description available';
+
+        const link = document.createElement('a');
+        if (project.url){
+            link.href = project.url;
+            link.textContent = 'Click here to see more...';
+            link.target = '_blank';
+        }else{
+            link.textContent = 'More information coming soon...';
+            link.style.pointerEvents = 'none';
+            link.style.opacity = '0.6';
+        }
+        Fragment.append(title, description, link);
+        spotlightTitle.append(Fragment)
     } catch (error) {
         console.error('Error in updateSpotlight: ', error);
     }
