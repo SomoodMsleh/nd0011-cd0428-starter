@@ -33,7 +33,6 @@ async function fetchAllData() {
 function populateAboutMe() {
     try {
         const aboutMeContainer = document.getElementById('aboutMe');
-        aboutMeContainer.innerHTML = '';
         const Fragment = document.createDocumentFragment();
         const bio = document.createElement('p');
         bio.textContent = aboutMeData.aboutMe || 'No bio available';
@@ -59,13 +58,14 @@ function populateAboutMe() {
 function populateProjects() {
     try {
         const projectContainer = document.getElementById('projectList');
-        aboutMeContainer.textContent = '';
         const Fragment = document.createDocumentFragment();
         projectData.forEach((project) => {
             const card = createProjectCard(project);
             Fragment.append(card);
         });
         projectContainer.append(Fragment);
+
+        setupProjectNavigation()
     } catch (error) {
         console.error('Error in populateProjects:', error);
     }
@@ -107,10 +107,50 @@ function createProjectCard(project) {
     }
 }
 
+function setupProjectNavigation() {
+    try {
+        const projectList = document.getElementById('projectList');
+        const leftArrow = document.querySelector('.arrow-left');
+        const rightArrow = document.querySelector('.arrow-right');
+
+        if (!projectList || !leftArrow || !rightArrow) return;
+
+        const getScrollAmount = () => {
+            const isMobile = window.matchMedia('(max-width: 1023px)').matches;
+            return isMobile ? 220 : 220; // card width + gap
+        };
+
+        const handleLeftScroll = (event) => {
+            if (event.pointerType === 'touch' && event.pressure === 0) return;
+            const scrollAmount = getScrollAmount();
+            const isMobile = window.matchMedia('(max-width: 1023px)').matches;
+            projectList.scrollBy({
+                [isMobile ? 'left' : 'top']: -scrollAmount,
+                behavior: 'smooth'
+            });
+        };
+
+        const handleRightScroll = (event) => {
+            if (event.pointerType === 'touch' && event.pressure === 0) return;
+            const scrollAmount = getScrollAmount();
+            const isMobile = window.matchMedia('(max-width: 1023px)').matches;
+            projectList.scrollBy({
+                [isMobile ? 'left' : 'top']: scrollAmount,
+                behavior: 'smooth'
+            });
+        };
+
+        leftArrow.addEventListener('pointerdown', handleLeftScroll);
+        rightArrow.addEventListener('pointerdown', handleRightScroll);
+    } catch (error) {
+        console.error('Error in setupProjectNavigation: ', error)
+    }
+}
+
 function updateSpotlight(project) {
     try {
 
     } catch (error) {
-        console.error('Error in updateSpotlight:', error);
+        console.error('Error in updateSpotlight: ', error);
     }
 }
