@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await fetchAllData();
         populateAboutMe()
         populateProjects();
+        setupFormValidation();
     }
     catch (error) {
         console.error('Error initializing page:', error);
@@ -33,7 +34,7 @@ async function fetchAllData() {
 function populateAboutMe() {
     try {
         const aboutMeContainer = document.getElementById('aboutMe');
-        const Fragment = document.createDocumentFragment();
+        const fragment = document.createDocumentFragment();
         const bio = document.createElement('p');
         bio.textContent = aboutMeData.aboutMe || 'No bio available';
         const headshotContainer = document.createElement('div');
@@ -48,8 +49,8 @@ function populateAboutMe() {
         headshotImg.alt = 'Profile headshot';
 
         headshotContainer.append(headshotImg);
-        Fragment.append(bio, headshotContainer);
-        aboutMeContainer.append(Fragment);
+        fragment.append(bio, headshotContainer);
+        aboutMeContainer.append(fragment);
     } catch (error) {
         console.error('Error in populateAboutMe:', error);
     }
@@ -58,14 +59,14 @@ function populateAboutMe() {
 function populateProjects() {
     try {
         const projectContainer = document.getElementById('projectList');
-        const Fragment = document.createDocumentFragment();
+        const fragment = document.createDocumentFragment();
         projectData.forEach((project) => {
             const card = createProjectCard(project);
-            Fragment.append(card);
+            fragment.append(card);
         });
-        projectContainer.append(Fragment);
+        projectContainer.append(fragment);
 
-        if (projectData.length > 0){
+        if (projectData.length > 0) {
             updateSpotlight(projectData[0])
         }
 
@@ -166,7 +167,7 @@ function updateSpotlight(project) {
         spotlight.style.backgroundPosition = 'center';
 
         spotlightTitle.innerHTML = '';
-        const Fragment = document.createDocumentFragment();
+        const fragment = document.createDocumentFragment();
 
         const title = document.createElement('h3');
         title.textContent = project.project_name || 'untitled project';
@@ -175,18 +176,104 @@ function updateSpotlight(project) {
         description.textContent = project.long_description || 'No description available';
 
         const link = document.createElement('a');
-        if (project.url){
+        if (project.url) {
             link.href = project.url;
             link.textContent = 'Click here to see more...';
             link.target = '_blank';
-        }else{
+        } else {
             link.textContent = 'More information coming soon...';
             link.style.pointerEvents = 'none';
             link.style.opacity = '0.6';
         }
-        Fragment.append(title, description, link);
-        spotlightTitle.append(Fragment)
+        fragment.append(title, description, link);
+        spotlightTitle.append(fragment)
     } catch (error) {
         console.error('Error in updateSpotlight: ', error);
+    }
+}
+
+function setupFormValidation() {
+    try {
+        const form = document.getElementById('formSection');
+        const emailInput = document.getElementById('contactEmail');
+        const messageInput = document.getElementById('contactMessage');
+        const charactersLeft = document.getElementById('charactersLeft');
+        const emailError = document.getElementById('emailError');
+        const messageError = document.getElementById('messageError');
+
+        const handleMessageLength = (event) => {
+            const length = messageInput.value.length;
+            const maxLength = 300;
+            charactersLeft.textContent = `Characters: ${length}/${maxLength}`;
+            if (length > maxLength) {
+                charactersLeft.classList.add('error');
+            } else {
+                charactersLeft.classList.remove('error');
+            }
+        };
+        messageInput.addEventListener('input', handleMessageLength);
+
+
+        const handleFormSubmit = (event) => {
+            event.preventDefault();
+
+            emailError.textContent = '';
+            messageError.textContent = '';
+            emailError.classList.remove('error');
+            messageError.classList.remove('error');
+
+            let isValid = true;
+
+            const email = emailInput.value.trim();
+
+            if (!email) {
+                emailError.textContent = 'Email address is required.';
+                emailError.classList.add('error');
+                isValid = false;
+            } else {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    emailError.textContent = 'Please enter a valid email address (e.g., user@example.com).';
+                    emailError.classList.add('error');
+                    isValid = false;
+                } else {
+                    const illegalCharsRegex = /[^a-zA-Z0-9@._-]/;
+                    if (illegalCharsRegex.test(email)) {
+                        emailError.textContent = 'Email contains illegal characters. Only letters, numbers, @, ., _, and - are allowed.';
+                        emailError.classList.add('error');
+                        isValid = false;
+                    }
+                }
+            }
+
+            const message = messageInput.value.trim();
+            if (!message) {
+                messageError.textContent = 'Message is required.';
+                messageError.classList.add('error');
+                isValid = false;
+            } else {
+                const illegalCharsRegex = /[^a-zA-Z0-9@._-]/;
+                if (illegalCharsRegex.test(message)) {
+                    messageError.textContent = 'Message contains illegal characters. Only letters, numbers, @, ., _, and - are allowed.';
+                    messageError.classList.add('error');
+                    isValid = false;
+                } else if (message.length > 300) {
+                    messageError.textContent = 'Message must be 300 characters or less.';
+                    messageError.classList.add('error');
+                    isValid = false;
+                }
+            }
+
+            if (isValid) {
+                alert('Form validation passed! Your message has been submitted successfully.');
+                form.reset();
+                charactersLeft.textContent = 'Characters: 0/300';
+                charactersLeft.classList.remove('error');
+            }
+        }
+        form.addEventListener('submit', handleFormSubmit)
+
+    } catch (error) {
+        console.error('Error in setupFormValidation: ', error);
     }
 }
