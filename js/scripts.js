@@ -4,6 +4,7 @@ let projectData = null;
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         await fetchAllData();
+        myName();
         populateAboutMe()
         populateProjects();
         setupFormValidation();
@@ -30,7 +31,10 @@ async function fetchAllData() {
         throw error;
     }
 }
-
+function myName(){
+    const name = document.querySelector('h1');
+    name.textContent = 'Somood Musleh';
+}
 function populateAboutMe() {
     try {
         const aboutMeContainer = document.getElementById('aboutMe');
